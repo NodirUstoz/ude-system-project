@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ t('nav.login') }} • ITpark Academy{% endblock %}
+
+{% block content %}
+<section class="auth">
+    <div class="container auth-grid">
+        <div class="auth-copy">
+            <h1>{{ t('auth.login_heading') }}</h1>
+            <p>{{ t('auth.login_copy') }}</p>
+            <ul class="auth-benefits">
+                {% for benefit in t('auth.benefits') %}
+                <li>{{ benefit }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="auth-card">
+            <h2>{{ t('auth.sign_in') }}</h2>
+            <form method="post" action="{{ url_for('login') }}" class="auth-form">
+                <label for="username">{{ t('auth.username') }}</label>
+                <input id="username" name="username" type="text" placeholder="{{ t('auth.username_placeholder') }}" required>
+
+                <label for="password">{{ t('auth.password') }}</label>
+                <input id="password" name="password" type="password" placeholder="{{ t('auth.password_placeholder') }}" required>
+
+                <button type="submit" class="btn btn-primary full-width">{{ t('auth.login_button') }}</button>
+                <p class="auth-hint">{{ t('auth.admin_hint') }}</p>
+                <p class="auth-hint">{{ t('auth.no_account') }} <a href="{{ url_for('register') }}">{{ t('auth.create_account') }}</a></p>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

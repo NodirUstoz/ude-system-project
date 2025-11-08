@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}500 - Server Error{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container" style="text-align: center; padding: 4rem 0;">
+        <h1 style="font-size: 6rem; margin: 0; color: var(--danger);">500</h1>
+        <h2>Internal Server Error</h2>
+        <p style="color: var(--muted); margin: 1.5rem 0;">
+            Something went wrong on our end. We're working to fix it.
+        </p>
+        <a href="{{ url_for('index') }}" class="btn btn-primary" style="margin-top: 2rem;">
+            Go to Homepage
+        </a>
+    </div>
+</section>
+{% endblock %}

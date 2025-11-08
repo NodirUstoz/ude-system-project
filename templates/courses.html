@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ t('courses.title') }} • ITpark Academy{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <h1>{{ t('courses.title') }}</h1>
+        <p>{{ t('courses.subtitle') }}</p>
+        <form class="search-form" method="get" action="{{ url_for('courses') }}">
+            <input type="text" name="q" value="{{ search }}" placeholder="{{ t('courses.search_placeholder') }}" aria-label="{{ t('courses.search_placeholder') }}">
+            <button type="submit" class="btn btn-primary">{{ t('courses.search_button') }}</button>
+        </form>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container card-grid">
+        {% for course in courses %}
+        <article class="card course-card" data-title="{{ course_title(course) | lower }}">
+            <div class="card-image"{% if course.image_url %} style="background-image: url('{{ course.image_url }}');"{% endif %}></div>
+            <div class="card-body">
+                <div class="card-meta">
+                    <span class="pill">{{ course_duration(course) }}</span>
+                    <span class="pill pill-price">${{ '%.2f'|format(course.price) }}</span>
+                </div>
+                <h3>{{ course_title(course) }}</h3>
+                <p>{{ course_description(course) }}</p>
+                <div class="card-footer">
+                    <div class="avatar"{% if course.teacher and course.teacher.image_url %} style="background-image: url('{{ course.teacher.image_url }}');"{% endif %}></div>
+                    <div>
+                        <span class="label">{{ t('courses.instructor') }}</span>
+                        <p>{{ course.teacher.name if course.teacher else 'TBA' }}</p>
+                        {% if course.teacher %}<small>{{ teacher_specialty(course.teacher) }}</small>{% endif %}
+                    </div>
+                </div>
+                <button type="button" class="btn btn-enroll" data-course-id="{{ course.id }}" data-course-name="{{ course_title(course) }}">{{ t('courses.enroll_button') }}</button>
+            </div>
+        </article>
+        {% else %}
+        <p class="empty-state">{{ t('courses.empty') }}</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const searchInput = document.querySelector('.search-form input[name="q"]');
+        const courseCards = document.querySelectorAll('.course-card');
+        if (!searchInput || !courseCards.length) return;
+
+        const filterCourses = (query) => {
+            const normalized = query.trim().toLowerCase();
+            let visibleCount = 0;
+            courseCards.forEach(card => {
+                const matches = card.dataset.title.includes(normalized);
+                card.style.display = matches ? 'flex' : 'none';
+                if (matches) visibleCount += 1;
+            });
+            const emptyState = document.querySelector('.empty-state');
+            if (emptyState) {
+                emptyState.style.display = visibleCount === 0 ? 'block' : 'none';
+            }
+        };
+
+        searchInput.addEventListener('input', (event) => filterCourses(event.target.value));
+    });
+</script>
+{% endblock %}

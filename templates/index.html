@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ t('nav.home') }} • ITpark Academy{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="container hero-grid">
+        <div class="hero-copy">
+            <span class="badge">{{ t('hero.badge') }}</span>
+            <h1>{{ t('hero.title') }}</h1>
+            <p>{{ t('hero.description') }}</p>
+            <div class="hero-actions">
+                <a class="btn btn-primary" href="{{ url_for('courses') }}">{{ t('hero.primary_cta') }}</a>
+                <a class="btn btn-outline" href="{{ url_for('teachers') }}">{{ t('hero.secondary_cta') }}</a>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <div class="floating-card">
+                <h3>{{ t('hero.card_title') }}</h3>
+                <p>{{ t('hero.card_date') }}</p>
+                <div class="progress">
+                    <span style="width: 68%;"></span>
+                </div>
+                <small>{{ t('hero.card_status') }}</small>
+            </div>
+            <div class="glow-box"></div>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container section-heading">
+        <span class="badge">{{ t('home.popular_badge') }}</span>
+        <h2>{{ t('home.featured_title') }}</h2>
+        <p>{{ t('home.featured_copy') }}</p>
+    </div>
+    <div class="container card-grid">
+        {% for course in courses %}
+        <article class="card">
+            <div class="card-image"{% if course.image_url %} style="background-image: url('{{ course.image_url }}');"{% endif %}></div>
+            <div class="card-body">
+                <h3>{{ course_title(course) }}</h3>
+                <p>{{ course_description(course)|truncate(120) }}</p>
+                <div class="card-meta">
+                    <span>{{ course_duration(course) }}</span>
+                    <span>${{ '%.2f'|format(course.price) }}</span>
+                </div>
+                <div class="card-actions">
+                    <a class="card-link" href="{{ url_for('courses') }}">{{ t('home.view_course') }}</a>
+                    <button type="button" class="btn btn-enroll" data-course-id="{{ course.id }}" data-course-name="{{ course_title(course) }}">{{ t('courses.enroll_button') }}</button>
+                </div>
+            </div>
+        </article>
+        {% else %}
+        <p class="empty-state">{{ t('home.courses_empty') }}</p>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="section alt">
+    <div class="container section-heading">
+        <span class="badge">{{ t('home.teachers_badge') }}</span>
+        <h2>{{ t('home.teachers_title') }}</h2>
+        <p>{{ t('home.teachers_copy') }}</p>
+    </div>
+    <div class="container teacher-grid">
+        {% for teacher in teachers %}
+        <article class="teacher-card">
+            <div class="teacher-photo"{% if teacher.image_url %} style="background-image: url('{{ teacher.image_url }}');"{% endif %}></div>
+            <div>
+                <h3>{{ teacher.name }}</h3>
+                <p class="teacher-specialty">{{ teacher_specialty(teacher) }}</p>
+                <p>{{ teacher_bio(teacher)|truncate(110) }}</p>
+            </div>
+        </article>
+        {% else %}
+        <p class="empty-state">{{ t('home.teachers_empty') }}</p>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="cta">
+    <div class="container cta-box">
+        <div>
+            <h2>{{ t('home.cta_title') }}</h2>
+            <p>{{ t('home.cta_copy') }}</p>
+        </div>
+        <a class="btn btn-primary" href="{{ url_for('register') }}">{{ t('home.cta_button') }}</a>
+    </div>
+</section>
+{% endblock %}

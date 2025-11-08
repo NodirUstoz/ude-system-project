@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ t('teachers.title') }} • ITpark Academy{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <h1>{{ t('teachers.title') }}</h1>
+        <p>{{ t('teachers.subtitle') }}</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container teacher-grid">
+        {% for teacher in teachers %}
+        <article class="teacher-card teacher-card--large">
+            <div class="teacher-photo"{% if teacher.image_url %} style="background-image: url('{{ teacher.image_url }}');"{% endif %}></div>
+            <div class="teacher-details">
+                <div class="teacher-header">
+                    <h3>{{ teacher.name }}</h3>
+                    <span class="pill">{{ teacher_specialty(teacher) }}</span>
+                </div>
+                <p>{{ teacher_bio(teacher) }}</p>
+                <div class="teacher-stats">
+                    <span><strong>{{ teacher.courses|length }}</strong> {{ t('courses.title') | lower }}</span>
+                    <span>{{ t('teachers.focus') }} {{ teacher_specialty(teacher) }}</span>
+                </div>
+            </div>
+        </article>
+        {% else %}
+        <p class="empty-state">{{ t('teachers.empty') }}</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

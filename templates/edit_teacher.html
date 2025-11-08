@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ t('admin.edit') }} • ITpark Academy{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <h1>{{ t('admin.edit') }} — {{ teacher.name }}</h1>
+        <p>{{ t('admin.subtitle') }}</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container form-card">
+        <form method="post" action="{{ url_for('edit_teacher', teacher_id=teacher.id) }}" class="admin-form">
+            <label>{{ t('admin.name') }}<input type="text" name="name" value="{{ teacher.name }}" required></label>
+            <label>{{ t('admin.specialty') }}<input type="text" name="specialty" value="{{ teacher.specialty }}" required></label>
+            <label>{{ t('admin.bio') }}<textarea name="bio" rows="4" required>{{ teacher.bio }}</textarea></label>
+            <label>{{ t('admin.image_url') }}<input type="url" name="image_url" value="{{ teacher.image_url }}" placeholder="https://"></label>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">{{ t('admin.edit') }}</button>
+                <a class="btn btn-outline" href="{{ url_for('admin') }}">{{ t('nav.home') }}</a>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

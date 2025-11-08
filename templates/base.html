@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="{{ current_language }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ITpark Academy{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    {% block extra_head %}{% endblock %}
+</head>
+<body data-theme="light">
+    <header class="site-header">
+        <div class="container nav-container">
+            <a class="brand" href="{{ url_for('index') }}">ITpark</a>
+            <nav id="main-nav" class="nav-links">
+                <a href="{{ url_for('index') }}" class="nav-link">{{ t('nav.home') }}</a>
+                <a href="{{ url_for('courses') }}" class="nav-link">{{ t('nav.courses') }}</a>
+                <a href="{{ url_for('teachers') }}" class="nav-link">{{ t('nav.teachers') }}</a>
+                {% if current_user.id %}
+                    <a href="{{ url_for('dashboard') }}" class="nav-link">{{ t('nav.dashboard') }}</a>
+                    {% if current_user.role == 'admin' %}
+                        <a href="{{ url_for('admin') }}" class="nav-link">{{ t('nav.admin') }}</a>
+                    {% endif %}
+                    <a href="{{ url_for('logout') }}" class="nav-link nav-cta">{{ t('nav.logout') }}</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="nav-link">{{ t('nav.login') }}</a>
+                    <a href="{{ url_for('register') }}" class="nav-link nav-cta">{{ t('nav.register') }}</a>
+                {% endif %}
+            </nav>
+            <div class="header-controls">
+                {% set active_lang = (languages | selectattr('code', 'equalto', current_language) | list | first) %}
+                <div class="language-switcher" aria-label="{{ t('language.label') }}">
+                    <button class="language-button" type="button" aria-haspopup="true" aria-expanded="false">
+                        <span class="language-flag">{{ active_lang.flag if active_lang else '🌐' }}</span>
+                        <span class="language-label">{{ active_lang.label if active_lang else current_language.upper() }}</span>
+                        <span class="language-caret">▾</span>
+                    </button>
+                    <div class="language-dropdown" role="menu">
+                        {% for language in languages if language.code != current_language %}
+                        <a href="{{ url_for('set_language', lang=language.code) }}" class="language-option" role="menuitem">
+                            <span class="language-flag">{{ language.flag }}</span>
+                            <span>{{ language.label }}</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                <button class="theme-toggle" type="button" aria-label="{{ t('theme.toggle') }}">
+                    <span class="theme-icon" data-light="☀" data-dark="🌙">☀</span>
+                </button>
+                <button class="nav-toggle" aria-label="Toggle navigation">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <section class="flash-container">
+                <div class="container">
+                    {% for category, message in messages %}
+                        <div class="flash flash-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            </section>
+        {% endif %}
+    {% endwith %}
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-grid">
+            <div>
+                <h3>ITpark Academy</h3>
+                <p>{{ t('footer.tagline') }}</p>
+            </div>
+            <div>
+                <h4>{{ t('footer.quick_links') }}</h4>
+                <ul>
+                    <li><a href="{{ url_for('courses') }}">{{ t('nav.courses') }}</a></li>
+                    <li><a href="{{ url_for('teachers') }}">{{ t('nav.teachers') }}</a></li>
+                    <li><a href="{{ url_for('login') }}">{{ t('nav.login') }}</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4>{{ t('footer.contact') }}</h4>
+                <ul>
+                    <li>{{ t('footer.email') }}: hello@itpark.uz</li>
+                    <li>{{ t('footer.phone') }}: +998 (90) 123-45-67</li>
+                    <li>{{ t('footer.address') }}: 123 Tech Avenue, Tashkent</li>
+                </ul>
+            </div>
+        </div>
+        <div class="container footer-bottom">
+            <p>&copy; {{ current_year }} ITpark Academy. {{ t('footer.rights') }}</p>
+        </div>
+    </footer>
+
+    <div class="modal-backdrop" id="enroll-modal" hidden>
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="enroll-modal-title">
+            <button type="button" class="modal-close" aria-label="{{ t('enroll.cancel') }}">×</button>
+            <h2 class="modal-title" id="enroll-modal-title" data-title-template="{{ t('enroll.title', course='{course}') }}"></h2>
+            <p class="modal-subtitle">{{ t('enroll.subtitle') }}</p>
+            <form method="post" action="{{ url_for('enroll_course') }}" class="modal-form">
+                <input type="hidden" name="course_id" value="">
+                <label>
+                    {{ t('enroll.name') }}
+                    <input type="text" name="full_name" required placeholder="{{ t('enroll.name') }}">
+                </label>
+                <div class="modal-form-row">
+                    <label>
+                        {{ t('enroll.age') }}
+                        <input type="number" name="age" min="10" max="80" placeholder="{{ t('enroll.age_placeholder') }}">
+                    </label>
+                    <label>
+                        {{ t('enroll.phone') }}
+                        <input type="tel" name="phone" required placeholder="{{ t('enroll.phone_placeholder') }}">
+                    </label>
+                </div>
+                <label>
+                    {{ t('enroll.experience') }}
+                    <textarea name="experience" rows="3" placeholder="{{ t('enroll.experience_placeholder') }}"></textarea>
+                </label>
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-primary">{{ t('enroll.submit') }}</button>
+                    <button type="button" class="btn btn-outline modal-close">{{ t('enroll.cancel') }}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

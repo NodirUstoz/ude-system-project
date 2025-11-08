@@ -1,0 +1,19 @@
+# Flask Core
+Flask==3.0.3
+Flask-SQLAlchemy==3.1.1
+
+# Security
+Flask-Bcrypt==1.0.1
+Flask-WTF==1.2.1
+WTForms==3.1.2
+Flask-Limiter==3.5.0
+
+# Configuration
+python-dotenv==1.0.0
+
+# Production Server
+gunicorn==22.0.0
+
+# Optional: PostgreSQL support
+# Uncomment if using PostgreSQL
+# psycopg2-binary==2.9.9

@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ t('nav.dashboard') }} • ITpark Academy{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <h1>{{ t('dashboard.greeting', username=user.username) }}</h1>
+        <p>{{ t('dashboard.subtitle') }}</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container dashboard-grid">
+        <div class="dashboard-card">
+            <h2>{{ t('dashboard.profile') }}</h2>
+            <ul class="profile-list">
+                <li><span class="label">{{ t('dashboard.username') }}</span><span>{{ user.username }}</span></li>
+                <li><span class="label">{{ t('dashboard.role') }}</span><span>{{ user.role|title }}</span></li>
+                <li><span class="label">{{ t('dashboard.member_since') }}</span><span>{{ user.created_at.strftime('%Y-%m-%d') if user.created_at else '—' }}</span></li>
+                <li><span class="label">{{ t('admin.status') }}</span><span>{{ t('admin.absent') if user.is_absent else t('admin.present') }}</span></li>
+            </ul>
+        </div>
+
+        <div class="dashboard-card">
+            <h2>{{ t('dashboard.enrolled') }}</h2>
+            {% if enrolled_courses %}
+            <ul class="course-list">
+                {% for course in enrolled_courses %}
+                <li>
+                    <h3>{{ course_title(course) }}</h3>
+                    <p>{{ course_description(course)|truncate(140) }}</p>
+                    <div class="card-meta">
+                        <span>{{ course_duration(course) }}</span>
+                        <span>${{ '%.2f'|format(course.price) }}</span>
+                    </div>
+                    <button type="button" class="btn btn-enroll" data-course-id="{{ course.id }}" data-course-name="{{ course_title(course) }}">{{ t('courses.enroll_button') }}</button>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="empty-state">{{ t('dashboard.none') }}</p>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,287 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ t('admin.title') }} • ITpark Academy{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <h1>{{ t('admin.title') }}</h1>
+        <p>{{ t('admin.subtitle') }}</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container admin-grid">
+        <div class="admin-panel">
+            <h2>{{ t('admin.courses') }}</h2>
+            <form class="admin-form" method="post" action="{{ url_for('create_course') }}">
+                <h3>{{ t('admin.add_course') }}</h3>
+                <label>{{ t('admin.title_label') }}<input type="text" name="title" required></label>
+                <label>{{ t('admin.description') }}<textarea name="description" rows="3" required></textarea></label>
+                <div class="admin-form-row">
+                    <label>{{ t('admin.duration') }}<input type="text" name="duration" placeholder="{{ t('admin.duration_placeholder') }}" required></label>
+                    <label>{{ t('admin.price') }}<input type="number" name="price" step="0.01" min="0" required></label>
+                </div>
+                <label>{{ t('admin.image_url') }}<input type="url" name="image_url" placeholder="https://"></label>
+                <label>{{ t('admin.teacher') }}
+                    <select name="teacher_id" required>
+                        <option value="" disabled selected>{{ t('admin.select_teacher') }}</option>
+                        {% for teacher in teachers %}
+                        <option value="{{ teacher.id }}">{{ teacher.name }} — {{ teacher_specialty(teacher) }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <button type="submit" class="btn btn-primary">{{ t('admin.add_button') }}</button>
+            </form>
+
+            <div class="admin-list">
+                {% for course in courses %}
+                <article class="admin-card">
+                    <div>
+                        <h4>{{ course_title(course) }}</h4>
+                        <p>{{ course_description(course)|truncate(140) }}</p>
+                        <div class="admin-card-meta">
+                            <span>{{ course_duration(course) }}</span>
+                            <span>${{ '%.2f'|format(course.price) }}</span>
+                            <span>{{ t('admin.teacher') }}: {{ course.teacher.name if course.teacher else '—' }}</span>
+                        </div>
+                    </div>
+                    <div class="admin-card-actions">
+                        <a class="btn btn-outline" href="{{ url_for('edit_course', course_id=course.id) }}">{{ t('admin.edit') }}</a>
+                        <form method="post" action="{{ url_for('delete_course', course_id=course.id) }}" onsubmit="return confirm('{{ t('admin.delete') }}?');">
+                            <button type="submit" class="btn btn-danger">{{ t('admin.delete') }}</button>
+                        </form>
+                    </div>
+                </article>
+                {% else %}
+                <p class="empty-state">{{ t('admin.courses_empty') }}</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="admin-panel">
+            <h2>{{ t('admin.teachers') }}</h2>
+            <form class="admin-form" method="post" action="{{ url_for('create_teacher') }}">
+                <h3>{{ t('admin.add_teacher') }}</h3>
+                <label>{{ t('admin.name') }}<input type="text" name="name" required></label>
+                <label>{{ t('admin.specialty') }}<input type="text" name="specialty" required></label>
+                <label>{{ t('admin.bio') }}<textarea name="bio" rows="3" required></textarea></label>
+                <label>{{ t('admin.image_url') }}<input type="url" name="image_url" placeholder="https://"></label>
+                <button type="submit" class="btn btn-primary">{{ t('admin.add_teacher_button') }}</button>
+            </form>
+
+            <div class="admin-list">
+                {% for teacher in teachers %}
+                <article class="admin-card">
+                    <div>
+                        <h4>{{ teacher.name }}</h4>
+                        <p>{{ teacher_bio(teacher)|truncate(140) }}</p>
+                        <div class="admin-card-meta">
+                            <span>{{ teacher_specialty(teacher) }}</span>
+                            <span>{{ teacher.courses|length }} {{ t('courses.title') | lower }}</span>
+                        </div>
+                    </div>
+                    <div class="admin-card-actions">
+                        <a class="btn btn-outline" href="{{ url_for('edit_teacher', teacher_id=teacher.id) }}">{{ t('admin.edit') }}</a>
+                        <form method="post" action="{{ url_for('delete_teacher', teacher_id=teacher.id) }}" onsubmit="return confirm('{{ t('admin.delete') }}?');">
+                            <button type="submit" class="btn btn-danger">{{ t('admin.delete') }}</button>
+                        </form>
+                    </div>
+                </article>
+                {% else %}
+                <p class="empty-state">{{ t('admin.teachers_empty') }}</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section alt">
+    <div class="container admin-users">
+        <h2>{{ t('admin.enroll_requests') }}</h2>
+        {% if enrollment_requests %}
+        <table>
+            <thead>
+                <tr>
+                    <th>{{ t('admin.enroll_course') }}</th>
+                    <th>{{ t('enroll.name') }}</th>
+                    <th>{{ t('enroll.phone') }}</th>
+                    <th>{{ t('enroll.age') }}</th>
+                    <th>{{ t('admin.enroll_submitted_at') }}</th>
+                    <th>{{ t('admin.enroll_status') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for req in enrollment_requests %}
+                <tr>
+                    <td>{{ course_title(req.course) if req.course else '—' }}</td>
+                    <td>{{ req.full_name }}</td>
+                    <td>{{ req.phone }}</td>
+                    <td>{{ req.age or '—' }}</td>
+                    <td>{{ req.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>
+                        <span class="pill">{{ t('admin.enroll_status_reviewed') if req.status != 'new' else t('admin.enroll_status_new') }}</span>
+                        {% if req.status == 'new' %}
+                        <form method="post" action="{{ url_for('update_enrollment_status', request_id=req.id) }}">
+                            <input type="hidden" name="status" value="reviewed">
+                            <button type="submit" class="btn btn-outline">{{ t('admin.enroll_mark_reviewed') }}</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="empty-state">{{ t('admin.users_empty') }}</p>
+        {% endif %}
+    </div>
+</section>
+
+<section class="section">
+    <div class="container admin-users">
+        <h2>{{ t('admin.users') }}</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>{{ t('admin.id') }}</th>
+                    <th>{{ t('admin.username') }}</th>
+                    <th>{{ t('admin.role') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.role|title }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="3">{{ t('admin.users_empty') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <h2>{{ t('admin.attendance') }}</h2>
+        <p class="attendance-hint">{{ t('admin.attendance_hint') }}</p>
+        {% for course in courses %}
+        {% set months = course_months.get(course.id, []) %}
+        <article class="attendance-manager" data-course-id="{{ course.id }}">
+            <header class="attendance-header">
+                <div>
+                    <h3>{{ course_title(course) }}</h3>
+                    <p>{{ course.students|length }}/{{ max_students }} {{ t('admin.students')|lower }}</p>
+                </div>
+            </header>
+            <div class="attendance-actions-grid">
+                <form class="admin-form" method="post" action="{{ url_for('add_course_student', course_id=course.id) }}">
+                    <h4>{{ t('admin.add_student') }}</h4>
+                    {% if course.students|length >= max_students %}
+                    <p class="empty-state">{{ t('admin.student_limit_reached') }}</p>
+                    {% else %}
+                    <label>{{ t('admin.student_name') }}<input type="text" name="full_name" required></label>
+                    <label>{{ t('admin.student_phone') }}<input type="text" name="phone" required></label>
+                    <label>{{ t('admin.student_notes') }}<textarea name="notes" rows="2"></textarea></label>
+                    <button type="submit" class="btn btn-primary">{{ t('admin.save_student') }}</button>
+                    {% endif %}
+                </form>
+                <div class="student-list-card">
+                    <h4>{{ t('admin.students') }}</h4>
+                    {% if course.students %}
+                    <ul class="student-list">
+                        {% for student in course.students %}
+                        <li>
+                            <div>
+                                <strong>{{ student.full_name }}</strong>
+                                <span>{{ student.phone }}</span>
+                            </div>
+                            <form method="post" action="{{ url_for('delete_course_student', course_id=course.id, student_id=student.id) }}" onsubmit="return confirm('{{ t('admin.delete') }}?');">
+                                <button type="submit" class="btn btn-outline">{{ t('admin.remove') }}</button>
+                            </form>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="empty-state">{{ t('admin.no_students') }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <form class="admin-form" method="post" action="{{ url_for('create_attendance_month') }}">
+                <h4>{{ t('admin.attendance_add_month') }}</h4>
+                <input type="hidden" name="course_id" value="{{ course.id }}">
+                <label>{{ t('admin.month_label') }}<input type="text" name="month_label" required></label>
+                <label>{{ t('admin.lesson_dates') }}<textarea name="lesson_dates" rows="3" required></textarea></label>
+                <button type="submit" class="btn btn-primary">{{ t('admin.save_month') }}</button>
+            </form>
+
+            {% if months %}
+            <div class="attendance-tabs" data-course="{{ course.id }}">
+                {% for month in months %}
+                <button type="button" class="attendance-tab{% if loop.first %} active{% endif %}" data-month-target="month-{{ month.object.id }}">{{ month.object.month_label }}</button>
+                {% endfor %}
+            </div>
+            <div class="attendance-tables">
+                {% for month in months %}
+                <div class="attendance-table{% if loop.first %} active{% endif %}" data-month-panel="month-{{ month.object.id }}">
+                    <div class="attendance-table-header">
+                        <h4>{{ month.object.month_label }}</h4>
+                        <form method="post" action="{{ url_for('delete_attendance_month', month_id=month.object.id) }}" onsubmit="return confirm('{{ t('admin.delete') }}?');">
+                            <button type="submit" class="btn btn-danger">{{ t('admin.remove') }}</button>
+                        </form>
+                    </div>
+                    <div class="attendance-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>{{ t('admin.students') }}</th>
+                                    {% for date in month.dates %}
+                                    <th>{{ date }}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for student in course.students %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ student.full_name }}</strong>
+                                        <small>{{ student.phone }}</small>
+                                    </td>
+                                    {% for date in month.dates %}
+                                    {% set idx = loop.index0 %}
+                                    {% set status = month.attendance.get(student.id, {}).get(idx) %}
+                                    <td>
+                                        <form method="post" action="{{ url_for('toggle_attendance') }}">
+                                            <input type="hidden" name="month_id" value="{{ month.object.id }}">
+                                            <input type="hidden" name="student_id" value="{{ student.id }}">
+                                            <input type="hidden" name="lesson_index" value="{{ idx }}">
+                                            <button type="submit" class="attendance-toggle {% if status == '+' %}present{% elif status == '-' %}absent{% endif %}">{{ status if status else '•' }}</button>
+                                        </form>
+                                    </td>
+                                    {% endfor %}
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="{{ month.dates|length + 1 }}" class="empty-state">{{ t('admin.no_students') }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="empty-state">{{ t('admin.no_months') }}</p>
+            {% endif %}
+        </article>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}
