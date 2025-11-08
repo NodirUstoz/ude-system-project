@@ -1,4 +1,4 @@
-# 🎓 ITpark Academy - Online Learning Platform
+# 🎓 IT Academy - Online learning platform
 
 [![Flask](https://img.shields.io/badge/Flask-3.0.3-blue.svg)](https://flask.palletsprojects.com/)
 [![Python](https://img.shields.io/badge/Python-3.8+-green.svg)](https://www.python.org/)
